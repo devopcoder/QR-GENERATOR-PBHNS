@@ -70,7 +70,7 @@ button{
 <button onclick="resetForm()">Reset</button>
 
 <div id="barcodeBox">
-<svg id="barcode"></svg>
+  <svg id="barcode"></svg>
 </div>
 
 </div>
@@ -80,7 +80,7 @@ function generateBarcode(){
 
 let last = lastname.value.trim();
 let first = firstname.value.trim();
-let mi = miInput = document.getElementById("mi").value.trim();
+let mi = document.getElementById("mi").value.trim();
 let parent = parentNumber.value.trim();
 let gradeSection = gradeSectionInput = document.getElementById("gradeSection").value.trim();
 
@@ -89,22 +89,25 @@ if(!last || !first || !mi || !parent || !gradeSection){
   return;
 }
 
-// Format name
+// Full name format
 let fullname = `${last}, ${first} ${mi}.`;
-let data = `${fullname}|${gradeSection}|${parent}`;
 
-JsBarcode("#barcode", data,{
+// FULL DATA (scanner only)
+let encodedData = `${fullname}|${gradeSection}|${parent}`;
+
+JsBarcode("#barcode", encodedData,{
   format:"CODE128",
   width:2,
   height:70,
   displayValue:true,
-  fontSize:12
+  text: last,   // 👈 LAST NAME ONLY (privacy)
+  fontSize:14
 });
 
 // LOCK INPUTS
 document.querySelectorAll("input").forEach(i => i.disabled = true);
 
-// AUTO DOWNLOAD PNG
+// AUTO DOWNLOAD
 setTimeout(() => {
   let svg = document.getElementById("barcode");
   let canvas = document.createElement("canvas");
@@ -120,7 +123,7 @@ setTimeout(() => {
     ctx.drawImage(img, 0, 0);
 
     let a = document.createElement("a");
-    a.download = fullname.replace(/,/g,"") + ".png";
+    a.download = last + ".png";
     a.href = canvas.toDataURL("image/png");
     a.click();
   };
@@ -133,6 +136,11 @@ document.querySelectorAll("input").forEach(i => {
   i.value = "";
 });
 document.getElementById("barcode").innerHTML = "";
+}
+</script>
+
+</body>
+</html>
 }
 </script>
 
