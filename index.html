@@ -1,131 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PBNHS PVC QR Generator</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PBNHS PVC ID Barcode Generator</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-image: url('1000169611.jpg');
-      background-size: cover;
-      background-position: center;
-      font-family: 'Segoe UI', sans-serif;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
+<style>
+body{
+  background:#111;
+  font-family:Segoe UI;
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
 
-    .container {
-      background: rgba(0,0,0,0.75);
-      padding: 25px;
-      border: 2px solid #00ffff;
-      border-radius: 15px;
-      box-shadow: 0 0 25px #00ffff;
-      text-align: center;
-      width: 380px;
-    }
+.container{
+  background:#000;
+  padding:25px;
+  border-radius:15px;
+  box-shadow:0 0 20px cyan;
+  text-align:center;
+  width:350px;
+}
 
-    h1 {
-      color: #00ffea;
-      text-shadow: 0 0 10px #00ffea;
-      margin-bottom: 12px;
-    }
+input{
+  width:90%;
+  padding:10px;
+  margin:6px;
+  border-radius:8px;
+  border:none;
+}
 
-    input {
-      width: 95%;
-      padding: 10px;
-      margin: 8px 0;
-      border: none;
-      border-radius: 8px;
-      background: #111;
-      color: #0ff;
-      font-size: 15px;
-      box-shadow: 0 0 8px #0ff;
-    }
+button{
+  padding:10px 20px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  background:cyan;
+  cursor:pointer;
+}
 
-    button {
-      margin-top: 12px;
-      padding: 10px 22px;
-      border: none;
-      border-radius: 10px;
-      background: #00ffff;
-      color: #000;
-      font-size: 16px;
-      cursor: pointer;
-      box-shadow: 0 0 15px #00ffff;
-    }
-
-    #qrcode {
-      margin-top: 20px;
-      background: #fff;
-      padding: 10px;
-      border-radius: 10px;
-    }
-  </style>
+#barcodeBox{
+  background:white;
+  margin-top:15px;
+  padding:10px;
+  border-radius:10px;
+}
+</style>
 </head>
 
 <body>
 
 <div class="container">
-  <h1>PBNHS PVC QR</h1>
 
-  <input type="text" id="name" placeholder="Student Name" required>
-  <input type="text" id="section" placeholder="Section / Grade" required>
-  <input type="text" id="parentNumber" placeholder="Parent Mobile No. (09xxxxxxxxx)" required>
+<h2>PBNHS PVC ID Generator</h2>
 
-  <button onclick="generateQRCode()">Generate PVC QR</button>
+<input id="lastname" placeholder="Last Name">
+<input id="firstname" placeholder="Given Name">
+<input id="mi" placeholder="Middle Initial">
 
-  <div id="qrcode"></div>
+<input id="parentNumber" placeholder="Parent Contact Number">
+<input id="gradeSection" placeholder="Grade & Section">
+
+<button onclick="generateBarcode()">Generate PVC Barcode</button>
+
+<div id="barcodeBox">
+<svg id="barcode"></svg>
+</div>
+
 </div>
 
 <script>
-function generateQRCode() {
-  const name = document.getElementById("name").value.trim();
-  const section = document.getElementById("section").value.trim();
-  const parentNumber = document.getElementById("parentNumber").value.trim();
-  const qrContainer = document.getElementById("qrcode");
+function generateBarcode(){
 
-  if (!name || !section || !parentNumber) {
-    alert("Please complete all fields.");
-    return;
-  }
+let last = document.getElementById("lastname").value.trim();
+let first = document.getElementById("firstname").value.trim();
+let mi = document.getElementById("mi").value.trim();
+let parent = document.getElementById("parentNumber").value.trim();
+let gradeSection = document.getElementById("gradeSection").value.trim();
 
-  // QR DATA (scanner + attendance + SMS compatible)
-  const qrData = JSON.stringify({
-    name: name,
-    section: section,
-    parentNumber: parentNumber
-  });
+if(!last || !first || !mi || !parent || !gradeSection){
+alert("Fill all fields");
+return;
+}
 
-  qrContainer.innerHTML = "";
+// Full Name Format: LAST, GIVEN M.
+let fullname = `${last}, ${first} ${mi}.`;
 
-  QRCode.toDataURL(qrData, {
-    width: 300,     // PVC-friendly
-    margin: 2,
-    color: {
-      dark: "#000000",
-      light: "#ffffff"
-    }
-  }, (err, url) => {
-    if (err) return console.error(err);
+// Data inside barcode
+let data = `${fullname}|${gradeSection}|${parent}`;
 
-    const img = document.createElement("img");
-    img.src = url;
-    qrContainer.appendChild(img);
-
-    // auto-download
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${name}_PVC_QR.png`;
-    a.click();
-  });
+JsBarcode("#barcode", data,{
+format:"CODE128",
+width:2,
+height:70,
+displayValue:true,
+fontSize:12
+});
 }
 </script>
 
