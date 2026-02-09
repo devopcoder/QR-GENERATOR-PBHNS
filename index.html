@@ -24,7 +24,7 @@ body{
   border-radius:15px;
   box-shadow:0 0 20px cyan;
   text-align:center;
-  width:350px;
+  width:360px;
 }
 
 input{
@@ -36,8 +36,8 @@ input{
 }
 
 button{
-  padding:10px 20px;
-  margin-top:10px;
+  padding:10px 18px;
+  margin-top:8px;
   border:none;
   border-radius:10px;
   background:cyan;
@@ -57,7 +57,7 @@ button{
 
 <div class="container">
 
-<h2>PBNHS PVC ID Generator</h2>
+<h2>PBNHS PVC ID</h2>
 
 <input id="lastname" placeholder="Last Name">
 <input id="firstname" placeholder="Given Name">
@@ -66,7 +66,8 @@ button{
 <input id="parentNumber" placeholder="Parent Contact Number">
 <input id="gradeSection" placeholder="Grade & Section">
 
-<button onclick="generateBarcode()">Generate PVC Barcode</button>
+<button onclick="generateBarcode()">Generate & Download</button>
+<button onclick="resetForm()">Reset</button>
 
 <div id="barcodeBox">
 <svg id="barcode"></svg>
@@ -77,30 +78,61 @@ button{
 <script>
 function generateBarcode(){
 
-let last = document.getElementById("lastname").value.trim();
-let first = document.getElementById("firstname").value.trim();
-let mi = document.getElementById("mi").value.trim();
-let parent = document.getElementById("parentNumber").value.trim();
-let gradeSection = document.getElementById("gradeSection").value.trim();
+let last = lastname.value.trim();
+let first = firstname.value.trim();
+let mi = miInput = document.getElementById("mi").value.trim();
+let parent = parentNumber.value.trim();
+let gradeSection = gradeSectionInput = document.getElementById("gradeSection").value.trim();
 
 if(!last || !first || !mi || !parent || !gradeSection){
-alert("Fill all fields");
-return;
+  alert("Fill all fields");
+  return;
 }
 
-// Full Name Format: LAST, GIVEN M.
+// Format name
 let fullname = `${last}, ${first} ${mi}.`;
-
-// Data inside barcode
 let data = `${fullname}|${gradeSection}|${parent}`;
 
 JsBarcode("#barcode", data,{
-format:"CODE128",
-width:2,
-height:70,
-displayValue:true,
-fontSize:12
+  format:"CODE128",
+  width:2,
+  height:70,
+  displayValue:true,
+  fontSize:12
 });
+
+// LOCK INPUTS
+document.querySelectorAll("input").forEach(i => i.disabled = true);
+
+// AUTO DOWNLOAD PNG
+setTimeout(() => {
+  let svg = document.getElementById("barcode");
+  let canvas = document.createElement("canvas");
+  let ctx = canvas.getContext("2d");
+  let img = new Image();
+
+  let svgData = new XMLSerializer().serializeToString(svg);
+  img.src = "data:image/svg+xml;base64," + btoa(svgData);
+
+  img.onload = () => {
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+
+    let a = document.createElement("a");
+    a.download = fullname.replace(/,/g,"") + ".png";
+    a.href = canvas.toDataURL("image/png");
+    a.click();
+  };
+}, 300);
+}
+
+function resetForm(){
+document.querySelectorAll("input").forEach(i => {
+  i.disabled = false;
+  i.value = "";
+});
+document.getElementById("barcode").innerHTML = "";
 }
 </script>
 
